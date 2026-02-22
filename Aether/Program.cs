@@ -55,6 +55,7 @@ namespace Aether
 
                 SDL.RenderPresent(renderer);
 
+                //Console.WriteLine($"FPS: {1f / deltaTime}");
                 SDL.Delay(16);
             }
 
