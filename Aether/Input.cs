@@ -91,5 +91,35 @@ namespace Aether
                 _ => -1
             };
         }
+
+        #region Keyboard
+
+        public static bool AnyKeyDown => keysPressedThisFrame.Count > 0;
+
+        public static bool GetKey(SDL.KeyCode key) => keyStates.TryGetValue(key, out bool state) && state;
+
+        public static bool GetKeyDown(SDL.KeyCode key) => keysPressedThisFrame.Contains(key);
+
+        public static bool GetKeyUp(SDL.KeyCode key) => keyReleasedThisFrame.Contains(key);
+
+        #endregion
+
+        #region Mouse
+
+        public static bool AnyMouseButtonDown => mouseButtonPressedThisFrame.Count > 0;
+
+        public static bool GetMouseButton(int button)
+        {
+            if (button < 0 || button >= mouseStates.Length)
+                return false;
+
+            return mouseStates[button];
+        }
+
+        public static bool GetMouseButtonDown(int button) => mouseButtonPressedThisFrame.Contains(button);
+
+        public static bool GetMouseButtonUp(int button) => mouseButtonReleasedThisFrame.Contains(button);
+
+        #endregion
     }
 }

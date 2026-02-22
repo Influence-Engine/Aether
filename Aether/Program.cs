@@ -48,11 +48,11 @@ namespace Aether
                         Console.WriteLine("Quit Polled");
                         running = false;
                     }
+                }
 
-                    if(e.type == SDL.EventType.MouseButtonDown)
-                    {
-                        clickPoints.Add(new SDL.FPoint(Input.mousePosition.X, Input.mousePosition.Y));
-                    }
+                if (Input.GetMouseButtonDown(0))
+                {
+                    clickPoints.Add(new SDL.FPoint(Input.mousePosition.X, Input.mousePosition.Y));
                 }
 
                 SDL.SetRenderDrawColor(renderer, 20, 20, 20, 255);
