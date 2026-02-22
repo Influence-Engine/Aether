@@ -4,19 +4,13 @@ namespace Aether.Simulation
 {
     public class Life
     {
-        Particle[] particles;
-        public Particle[] Particles => particles;
-        ForceMatrix forceMatrix;
+        public Particle[] particles;
+        public ForceMatrix forceMatrix;
 
         float interactionRadius;
         float forceMultiplier;
         float damping;
         float maxSpeed;
-
-        float minSeperation;
-        float selfRepelStrength;
-        float maxSelfRepel;
-        float collisionSoftness;
 
         int width;
         int height;
@@ -34,17 +28,12 @@ namespace Aether.Simulation
             this.typeCount = typeCount;
 
             interactionRadius = 32f;
-            forceMultiplier = 1.1f;
+            forceMultiplier = 0.8f;
             damping = 0.95f;
-            maxSpeed = 64f;
-
-            minSeperation = 8f;
-            selfRepelStrength = 10f;
-            maxSelfRepel = 100f;
-            collisionSoftness = 0.5f;
+            maxSpeed = 128f;
 
             forceMatrix = new ForceMatrix(typeCount);
-            forceMatrix.SetPattern(ForcePattern.Default);
+            forceMatrix.SetPattern(ForcePattern.AllRepel);
 
             particles = new Particle[particleCount];
             InitializeRandom();
@@ -62,12 +51,13 @@ namespace Aether.Simulation
             }
         }
 
-        public void Update(float deltaTime)
+        public void Tick()
         {
+            float deltaTime = Time.fixedDeltaTime;
+
             for (int i = 0; i < particleCount; i++)
             {
                 SDL.FPoint force = SDL.FPoint.Zero;
-                SDL.FPoint selfRepelForce = SDL.FPoint.Zero;
 
                 for (int j = 0; j < particleCount; j++)
                 {
@@ -75,39 +65,44 @@ namespace Aether.Simulation
                         continue;
 
                     SDL.FPoint delta = particles[j].position - particles[i].position;
-                    float distance = MathF.Sqrt(delta.LengthSquared);
+                    float distanceSq = delta.LengthSquared;
 
-                    if(distance < interactionRadius && distance > 0.1f)
+                    if (distanceSq < interactionRadius * interactionRadius && distanceSq > 0.1f)
                     {
+                        float distance = MathF.Sqrt(distanceSq);
                         SDL.FPoint direction = new SDL.FPoint(delta.x / distance, delta.y / distance);
+
                         float f = forceMatrix.GetForce(particles[i].type, particles[j].type);
                         float strength = f * (1 - distance / interactionRadius);
 
-                        force += direction * strength;
-
-                        if(distance < minSeperation)
+                        float collisionDistance = 4f;
+                        if(distance <collisionDistance)
                         {
-                            float repelStrength = selfRepelStrength * (1 - distance / minSeperation);
-                            selfRepelForce += direction * repelStrength;
+                            float t = 1f - (distance / collisionDistance);
+                            float collisionStrength = 50f * t * t;
+
+                            force -= direction * collisionStrength;
+                            strength *= 0.334f;
                         }
+
+                        force += direction * strength;
                     }
                 }
 
-                if(selfRepelForce != SDL.FPoint.Zero)
-                {
-                    float repelMagnitude = MathF.Sqrt(selfRepelForce.LengthSquared);
-                    if (repelMagnitude > maxSelfRepel)
-                        selfRepelForce = new SDL.FPoint(selfRepelForce.x / repelMagnitude, selfRepelForce.y / repelMagnitude) * maxSelfRepel;
-
-                    particles[i].velocity += selfRepelForce * deltaTime;
-                }
-
-                particles[i].velocity += force * forceMultiplier * deltaTime ;
+                particles[i].velocity += force * forceMultiplier * deltaTime * 100f;
             }
 
             for (int i = 0; i < particleCount; i++)
             {
                 particles[i].Update(deltaTime, damping, maxSpeed, width, height);
+            }
+        }
+
+        public void Tick(int tickCount)
+        {
+            for(int i = 0; i < tickCount; i++)
+            {
+                Tick();
             }
         }
     }

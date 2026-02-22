@@ -22,7 +22,7 @@ namespace Aether.Rendering
 
         public static void DrawParticles(nint renderer, Life simulation)
         {
-            var particles = simulation.Particles;
+            var particles = simulation.particles;
             int count = simulation.ParticleCount;
 
             for (int i = 0; i < count; i++)
@@ -34,7 +34,7 @@ namespace Aether.Rendering
 
         public static void DrawParticlesRect(nint renderer, Life simulation)
         {
-            var particles = simulation.Particles;
+            var particles = simulation.particles;
             int count = simulation.ParticleCount;
 
             for (int i = 0; i < count; i++)

@@ -6,13 +6,11 @@ namespace Aether
 {
     internal static class Program
     {
-        const int width = 1280;
-        const int height = 720;
+        const int width = 480;
+        const int height = 480;
 
-        const int particleCount = 5000;
-        const int typeCount = 3;
-
-        static float timeScale = 1f;
+        const int particleCount = 2500;
+        const int typeCount = 5;
 
         public static void Main(string[] args)
         {
@@ -31,18 +29,24 @@ namespace Aether
             Life life = new Life(width, height, particleCount, typeCount);
 
             bool running = true;
+            bool isPaused = false;
+            bool stepOneTick = false;
 
+            float deltaTime = 0f;
             ulong lastTime = SDL.GetTicks();
+
+            float accumulator = 0f;
 
             while (running)
             {
                 ulong currentTime = SDL.GetTicks();
-                float deltaTime = (currentTime - lastTime) / 1000f;
+                deltaTime = (currentTime - lastTime) / 1000f;
                 lastTime = currentTime;
 
+                Time.Update(deltaTime);
                 Input.Update();
 
-                while(SDL.PollEvent(out SDL.Event e))
+                while (SDL.PollEvent(out SDL.Event e))
                 {
                     Input.ProcessEvent(e);
 
@@ -53,22 +57,68 @@ namespace Aether
                     }
                 }
 
+                if (Input.GetKeyDown(SDL.KeyCode.Space))
+                {
+                    isPaused = !isPaused;
+                    Time.timeScale = isPaused ? 0f : 1f;
+                    Console.WriteLine(isPaused ? "Paused" : "Playing");
+                }
+
+                if (Input.GetKeyDown(SDL.KeyCode.D) && isPaused)
+                    stepOneTick = true;
+
+                if (Input.GetKeyDown(SDL.KeyCode.R))
+                {
+                    Time.Reset();
+                    life = new Life(width, height, particleCount, typeCount);
+                    Console.WriteLine("Simulation reset");
+                }
+
+                if (Input.GetKeyDown(SDL.KeyCode.Q))
+                {
+                    ForceMatrix newMatrix = new ForceMatrix(typeCount);
+                    newMatrix.Randomize();
+                    life.forceMatrix = newMatrix;
+                }
+
                 if (Input.GetKeyDown(SDL.KeyCode.Escape))
                     running = false; // Quick escape
 
-                timeScale += Input.mouseScrollDelta.y * 0.2f;
+                if(Input.mouseScrollDelta.y != 0)
+                {
+                    Time.timeScale += Input.mouseScrollDelta.y * 0.1f;
+                    Console.WriteLine($"Time Scale: {Time.timeScale:F2}x");
+                }
 
-                life.Update(deltaTime * timeScale);
+                // Fixed timestep simulation
+                if (!isPaused || stepOneTick)
+                {
+                    accumulator += Time.unscaledDeltaTime;
+
+                    while (accumulator >= Time.fixedDeltaTime)
+                    {
+                        life.Tick();
+                        Time.Tick();
+                        accumulator -= Time.fixedDeltaTime;
+
+                        if (stepOneTick)
+                        {
+                            stepOneTick = false;
+                            break;
+                        }
+                    }
+                }
 
                 SDL.SetRenderDrawColor(renderer, 20, 20, 20, 255);
                 SDL.RenderClear(renderer);
 
+                // Draw Particles
                 Renderer.DrawParticlesRect(renderer, life);
 
                 SDL.RenderPresent(renderer);
 
-                Console.WriteLine($"TimeScale: {timeScale}");
-                Console.WriteLine($"FPS: {1f / deltaTime}");
+                //Console.WriteLine($"TimeScale: {timeScale}");
+                //Console.WriteLine($"FPS: {1f / deltaTime}");
             }
 
             SDL.DestroyRenderer(renderer);
