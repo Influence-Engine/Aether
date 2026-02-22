@@ -6,11 +6,11 @@ namespace Aether
 {
     internal static class Program
     {
-        const int width = 480;
-        const int height = 480;
+        const int width = 512;
+        const int height = 512;
 
-        const int particleCount = 2500;
-        const int typeCount = 5;
+        const int particleCount = 7000;
+        const int typeCount = 32;
 
         public static void Main(string[] args)
         {
@@ -79,6 +79,11 @@ namespace Aether
                     ForceMatrix newMatrix = new ForceMatrix(typeCount);
                     newMatrix.Randomize();
                     life.forceMatrix = newMatrix;
+                }
+
+                if (Input.GetKeyDown(SDL.KeyCode.W))
+                {
+                    life.forceMatrix.SetPattern(ForcePattern.Atomic);
                 }
 
                 if (Input.GetKeyDown(SDL.KeyCode.Escape))

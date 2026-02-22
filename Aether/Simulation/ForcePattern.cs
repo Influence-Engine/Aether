@@ -8,6 +8,7 @@
         Symbiosis,
         Neutral,
         AllAttract,
-        AllRepel
+        AllRepel,
+        Atomic
     }
 }
