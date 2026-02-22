@@ -41,6 +41,11 @@ namespace Aether
                         Console.WriteLine("Quit Polled");
                         running = false;
                     }
+
+                    if(e.type == SDL.EventType.MouseButtonDown)
+                    {
+                        Console.WriteLine("Mouse Down");
+                    }
                 }
 
                 SDL.SetRenderDrawColor(renderer, 20, 20, 20, 255);
