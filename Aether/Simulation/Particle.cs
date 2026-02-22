@@ -28,12 +28,30 @@ namespace Aether.Simulation
             if (velocity.LengthSquared > maxSpeed * maxSpeed)
                 velocity = SDL.FPoint.Normalize(velocity) * maxSpeed;
 
-            // Wrap around screen
-            if (position.x < 0) position.y = width;
-            if (position.x > width) position.x = 0;
-            if (position.y < 0) position.y = height;
-            if (position.y > height) position.y = 0;
+            float edgeForce = 100f;
+            float edgeDistance = 50f;
 
+            if(position.x < edgeDistance) // Left Edge
+            {
+                float t = 1f - (position.x / edgeDistance);
+                velocity.x += t * edgeForce * deltaTime;
+            }
+            else if(position.x > width - edgeDistance) // Right Edge
+            {
+                float t = (position.x / (width - edgeDistance)) / edgeDistance;
+                velocity.x -= t * edgeForce * deltaTime;
+            }
+
+            if(position.y < edgeDistance)
+            {
+                float t = 1f - (position.y / edgeDistance);
+                velocity.y += t* edgeForce * deltaTime;
+            }
+            else if(position.y > height - edgeDistance)
+            {
+                float t = (position.y - (height -edgeDistance)) / edgeDistance;
+                velocity.y -= t * edgeForce * deltaTime;
+            }
         }
     }
 }
