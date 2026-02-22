@@ -1,5 +1,6 @@
 ﻿using Aether.Simulation;
 using SDL3;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace Aether.Rendering
@@ -8,7 +9,7 @@ namespace Aether.Rendering
     {
         static SDL.FColor[] colorCache = new SDL.FColor[64];
 
-        static SDL.FRect[] rectBuffer = new SDL.FRect[1024];
+        static SDL.FRect[] rectBuffer = new SDL.FRect[2048];
 
         static Renderer()
         {
@@ -89,6 +90,60 @@ namespace Aether.Rendering
                         y = particle.position.Y - particle.radius,
                         w = particle.radius * 2,
                         h = particle.radius * 2
+                    };
+                }
+
+                if (rectCount > 0)
+                    SDL.RenderFillRects(renderer, rectBuffer, rectCount);
+            }
+        }
+
+        public static void DrawParticleRectBatch(nint renderer, Life simulation, Camera camera)
+        {
+            var particles = simulation.particles;
+            int count = simulation.ParticleCount;
+
+            var (visibleMin, visibleMax) = camera.GetVisibleBounds();
+
+            for (int type = 0; type < simulation.TypeCount; type++)
+            {
+                SDL.FColor color = GetColorForType(type);
+                SDL.SetRenderDrawColor(renderer, (byte)(color.r * 255), (byte)(color.g * 255), (byte)(color.b * 255), (byte)(color.a * 255));
+
+                int rectCount = 0;
+
+                for (int i = 0; i < count; i++)
+                {
+                    ref Particle particle = ref particles[i];
+                    if (particle.type != type)
+                        continue;
+
+                    if (particle.position.X + particle.radius < visibleMin.X ||
+                        particle.position.X - particle.radius > visibleMax.X ||
+                        particle.position.Y + particle.radius < visibleMin.Y ||
+                        particle.position.Y - particle.radius > visibleMax.Y)
+                        continue;
+
+                    Vector2 screenPos = camera.WorldToScreen(particle.position);
+
+                    float screenRadius = particle.radius * camera.zoom;
+                    if (screenRadius < 0.5f)
+                        continue;
+
+                    if (rectCount >= rectBuffer.Length)
+                    {
+                        if (rectCount > 0)
+                            SDL.RenderFillRects(renderer, rectBuffer, rectCount);
+
+                        rectCount = 0;
+                    }
+
+                    rectBuffer[rectCount++] = new SDL.FRect
+                    {
+                        x = screenPos.X - screenRadius,
+                        y = screenPos.Y - screenRadius,
+                        w = screenRadius * 2,
+                        h = screenRadius * 2
                     };
                 }
 

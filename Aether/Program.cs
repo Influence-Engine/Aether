@@ -1,16 +1,17 @@
 ﻿using Aether.Rendering;
 using Aether.Simulation;
 using SDL3;
+using System.Numerics;
 
 namespace Aether
 {
     internal static class Program
     {
-        const int width = 1280;
-        const int height = 720;
+        const int width = 1920;
+        const int height = 1080;
 
         const int particleCount = 50000;
-        const int typeCount = 8;
+        const int typeCount = 5;
 
         public static void Main(string[] args)
         {
@@ -28,6 +29,8 @@ namespace Aether
 
             Life life = new Life(width, height, particleCount, typeCount);
 
+            Camera camera = new Camera(width, height);
+
             bool running = true;
             bool isPaused = false;
             bool stepOneTick = false;
@@ -36,6 +39,9 @@ namespace Aether
             ulong lastTime = SDL.GetTicks();
 
             float accumulator = 0f;
+
+            bool isDragging = false;
+            Vector2 lastMouseWorldPos = Vector2.Zero;
 
             while (running)
             {
@@ -67,21 +73,21 @@ namespace Aether
                 if (Input.GetKeyDown(SDL.KeyCode.D) && isPaused)
                     stepOneTick = true;
 
-                if (Input.GetKeyDown(SDL.KeyCode.R))
+                if (Input.GetKeyDown(SDL.KeyCode.C))
                 {
                     Time.Reset();
                     life = new Life(width, height, particleCount, typeCount);
-                    Console.WriteLine("Simulation reset");
+                    Console.WriteLine("Simulation Cleared");
                 }
 
-                if (Input.GetKeyDown(SDL.KeyCode.Q))
+                if (Input.GetKeyDown(SDL.KeyCode.R))
                 {
                     ForceMatrix newMatrix = new ForceMatrix(typeCount);
                     newMatrix.Randomize();
                     life.forceMatrix = newMatrix;
                 }
 
-                if (Input.GetKeyDown(SDL.KeyCode.W))
+                if (Input.GetKeyDown(SDL.KeyCode.Q))
                 {
                     life.forceMatrix.SetPattern(ForcePattern.Atomic);
                 }
@@ -91,9 +97,44 @@ namespace Aether
 
                 if(Input.mouseScrollDelta.y != 0)
                 {
-                    Time.timeScale += Input.mouseScrollDelta.y * 0.1f;
-                    Console.WriteLine($"Time Scale: {Time.timeScale:F2}x");
+                    float zoomFactor = 0.1f;
+                    if (Input.mouseScrollDelta.y > 0)
+                        camera.zoom += zoomFactor;
+                    else
+                        camera.zoom -= zoomFactor;
+
+                    camera.zoom = Math.Clamp(camera.zoom, 0.1f, 10f);
                 }
+
+                if(Input.GetMouseButtonDown(2))
+                {
+                    isDragging = true;
+                    lastMouseWorldPos = camera.ScreenToWorld(Input.mousePosition);
+                }
+
+                if(Input.GetMouseButtonUp(2))
+                {
+                    isDragging = false;
+                }
+
+                if(isDragging && Input.GetMouseButton(2))
+                {
+                    Vector2 currentWorldPos = camera.ScreenToWorld(Input.mousePosition);
+                    Vector2 deltaWorld = currentWorldPos - lastMouseWorldPos;
+                    camera.Move(-deltaWorld);
+                    lastMouseWorldPos = camera.ScreenToWorld(Input.mousePosition);
+                }
+
+                float panSpeed = 500f / camera.zoom * (float)Time.deltaTime;
+
+                if (Input.GetKey(SDL.KeyCode.W))
+                    camera.Move(new Vector2(0, -panSpeed));
+                if (Input.GetKey(SDL.KeyCode.S))
+                    camera.Move(new Vector2(0, panSpeed));
+                if (Input.GetKey(SDL.KeyCode.A))
+                    camera.Move(new Vector2(-panSpeed, 0));
+                if (Input.GetKey(SDL.KeyCode.D))
+                    camera.Move(new Vector2(panSpeed, 0));
 
                 // Fixed timestep simulation
                 if (!isPaused || stepOneTick)
@@ -118,7 +159,7 @@ namespace Aether
                 SDL.RenderClear(renderer);
 
                 // Draw Particles
-                Renderer.DrawParticleRectBatch(renderer, life);
+                Renderer.DrawParticleRectBatch(renderer, life, camera);
 
                 SDL.RenderPresent(renderer);
 
