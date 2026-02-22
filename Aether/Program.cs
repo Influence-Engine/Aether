@@ -9,7 +9,7 @@ namespace Aether
         const int width = 1280;
         const int height = 720;
 
-        const int particleCount = 20000;
+        const int particleCount = 50000;
         const int typeCount = 8;
 
         public static void Main(string[] args)
@@ -118,7 +118,7 @@ namespace Aether
                 SDL.RenderClear(renderer);
 
                 // Draw Particles
-                Renderer.DrawParticlesRect(renderer, life);
+                Renderer.DrawParticleRectBatch(renderer, life);
 
                 SDL.RenderPresent(renderer);
 

@@ -8,6 +8,8 @@ namespace Aether.Rendering
     {
         static SDL.FColor[] colorCache = new SDL.FColor[64];
 
+        static SDL.FRect[] rectBuffer = new SDL.FRect[1024];
+
         static Renderer()
         {
             for (int i = 0; i < colorCache.Length; i++)
@@ -52,6 +54,46 @@ namespace Aether.Rendering
 
                 SDL.SetRenderDrawColor(renderer, (byte)(color.r * 255), (byte)(color.g * 255), (byte)(color.b * 255), (byte)(color.a * 255));
                 SDL.RenderRect(renderer, ref rect);
+            }
+        }
+        
+        public static void DrawParticleRectBatch(nint renderer, Life simulation)
+        {
+            var particles = simulation.particles;
+            int count = simulation.ParticleCount;
+
+            for(int type = 0; type < simulation.TypeCount; type++)
+            {
+                SDL.FColor color = GetColorForType(type);
+                SDL.SetRenderDrawColor(renderer, (byte)(color.r * 255), (byte)(color.g * 255), (byte)(color.b * 255), (byte)(color.a * 255));
+
+                int rectCount = 0;
+
+                for(int i = 0; i < count; i++)
+                {
+                    ref Particle particle = ref particles[i];
+                    if (particle.type != type)
+                        continue;
+
+                    if(rectCount >= rectBuffer.Length)
+                    {
+                        if (rectCount > 0)
+                            SDL.RenderFillRects(renderer, rectBuffer, rectCount);
+
+                        rectCount = 0;
+                    }
+
+                    rectBuffer[rectCount++] = new SDL.FRect
+                    {
+                        x = particle.position.X - particle.radius,
+                        y = particle.position.Y - particle.radius,
+                        w = particle.radius * 2,
+                        h = particle.radius * 2
+                    };
+                }
+
+                if (rectCount > 0)
+                    SDL.RenderFillRects(renderer, rectBuffer, rectCount);
             }
         }
 
