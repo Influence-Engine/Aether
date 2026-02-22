@@ -10,6 +10,8 @@ namespace Aether
 
         static Vector2 mousePosition;
 
+        static List<SDL.FPoint> clickPoints = new List<SDL.FPoint>();
+
         public static void Main(string[] args)
         {
             if(!SDL.Init(SDL.InitFlags.Video))
@@ -48,19 +50,22 @@ namespace Aether
                     if(e.type == SDL.EventType.MouseMotion)
                     {
                         mousePosition = new Vector2(e.motion.x, e.motion.y);
-                        Console.WriteLine(mousePosition.ToString());
                     }
 
                     if(e.type == SDL.EventType.MouseButtonDown)
                     {
-                        Console.WriteLine("Mouse Down");
+                        clickPoints.Add(new SDL.FPoint(mousePosition.X, mousePosition.Y));
                     }
                 }
 
                 SDL.SetRenderDrawColor(renderer, 20, 20, 20, 255);
                 SDL.RenderClear(renderer);
 
-                SDL.RenderCircle(renderer, shapeCenter, shapeRadius, SDL.FColor.Green);
+                for (int i = 0; i < clickPoints.Count; ++i)
+                {
+                    SDL.FPoint point = clickPoints[i];
+                    SDL.RenderCircle(renderer, point, shapeRadius, SDL.FColor.Green);
+                }
 
                 SDL.RenderPresent(renderer);
 
