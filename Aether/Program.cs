@@ -1,5 +1,4 @@
 ﻿using SDL3;
-using System.Numerics;
 
 namespace Aether
 {
@@ -55,7 +54,7 @@ namespace Aether
 
                 if (Input.GetMouseButtonDown(0))
                 {
-                    clickPoints.Add(new SDL.FPoint(Input.mousePosition.X, Input.mousePosition.Y));
+                    clickPoints.Add(new SDL.FPoint(Input.mousePosition.x, Input.mousePosition.y));
                 }
 
                 SDL.SetRenderDrawColor(renderer, 20, 20, 20, 255);

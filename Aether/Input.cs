@@ -1,6 +1,4 @@
-﻿
-using SDL3;
-using System.Numerics;
+﻿using SDL3;
 
 namespace Aether
 {
@@ -14,10 +12,10 @@ namespace Aether
         static HashSet<int> mouseButtonPressedThisFrame = new HashSet<int>();
         static HashSet<int> mouseButtonReleasedThisFrame = new(); // breh
 
-        public static Vector2 mousePosition { get; private set; }
-        static Vector2 lastMousePosition;
-        public static Vector2 mouseDelta { get; private set; }
-        public static Vector2 mouseScrollDelta { get; private set; }
+        public static SDL.FPoint mousePosition { get; private set; }
+        static SDL.FPoint lastMousePosition;
+        public static SDL.FPoint mouseDelta { get; private set; }
+        public static SDL.FPoint mouseScrollDelta { get; private set; }
 
         public static void Update()
         {
@@ -29,7 +27,7 @@ namespace Aether
             mouseDelta = mousePosition - lastMousePosition;
             lastMousePosition = mousePosition;
 
-            mouseScrollDelta = Vector2.Zero;
+            mouseScrollDelta = SDL.FPoint.Zero;
         }
 
         public static void ProcessEvent(SDL.Event e)
@@ -70,11 +68,11 @@ namespace Aether
                     break;
 
                 case SDL.EventType.MouseMotion:
-                    mousePosition = new Vector2(e.motion.x, e.motion.y);
+                    mousePosition = new SDL.FPoint(e.motion.x, e.motion.y);
                     break;
 
                 case SDL.EventType.MouseWheel:
-                    mouseScrollDelta = new Vector2(e.wheel.x, e.wheel.y);
+                    mouseScrollDelta = new SDL.FPoint(e.wheel.x, e.wheel.y);
                     break;
             }
         }
