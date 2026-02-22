@@ -1,4 +1,6 @@
-﻿using SDL3;
+﻿using Aether.Rendering;
+using Aether.Simulation;
+using SDL3;
 
 namespace Aether
 {
@@ -7,7 +9,10 @@ namespace Aether
         const int width = 1280;
         const int height = 720;
 
-        static List<SDL.FPoint> clickPoints = new List<SDL.FPoint>();
+        const int particleCount = 5000;
+        const int typeCount = 3;
+
+        static float timeScale = 1f;
 
         public static void Main(string[] args)
         {
@@ -23,10 +28,9 @@ namespace Aether
             nint renderer = SDL.CreateRenderer(window, null);
             Console.WriteLine($"Renderer Created: {renderer}");
 
-            bool running = true;
+            Life life = new Life(width, height, particleCount, typeCount);
 
-            SDL.FPoint shapeCenter = new SDL.FPoint { x = width / 2, y = height / 2 };
-            float shapeRadius= 32f;
+            bool running = true;
 
             ulong lastTime = SDL.GetTicks();
 
@@ -52,24 +56,19 @@ namespace Aether
                 if (Input.GetKeyDown(SDL.KeyCode.Escape))
                     running = false; // Quick escape
 
-                if (Input.GetMouseButtonDown(0))
-                {
-                    clickPoints.Add(new SDL.FPoint(Input.mousePosition.x, Input.mousePosition.y));
-                }
+                timeScale += Input.mouseScrollDelta.y * 0.2f;
+
+                life.Update(deltaTime * timeScale);
 
                 SDL.SetRenderDrawColor(renderer, 20, 20, 20, 255);
                 SDL.RenderClear(renderer);
 
-                for (int i = 0; i < clickPoints.Count; ++i)
-                {
-                    SDL.FPoint point = clickPoints[i];
-                    SDL.RenderCircle(renderer, point, shapeRadius, SDL.FColor.Green);
-                }
+                Renderer.DrawParticlesRect(renderer, life);
 
                 SDL.RenderPresent(renderer);
 
-                //Console.WriteLine($"FPS: {1f / deltaTime}");
-                SDL.Delay(16);
+                Console.WriteLine($"TimeScale: {timeScale}");
+                Console.WriteLine($"FPS: {1f / deltaTime}");
             }
 
             SDL.DestroyRenderer(renderer);
