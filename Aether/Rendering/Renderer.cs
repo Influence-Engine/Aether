@@ -15,10 +15,10 @@ namespace Aether.Rendering
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DrawParticle(nint renderer, ref Particle particle) => SDL.RenderCircle(renderer, particle.position, particle.radius, GetColorForType(particle.type));
+        public static void DrawParticle(nint renderer, ref Particle particle) => SDL.RenderCircle(renderer, particle.ToFPoint(), particle.radius, GetColorForType(particle.type));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DrawParticle(nint renderer, ref Particle particle, SDL.FColor color) => SDL.RenderCircle(renderer, particle.position, particle.radius, color);
+        public static void DrawParticle(nint renderer, ref Particle particle, SDL.FColor color) => SDL.RenderCircle(renderer, particle.ToFPoint(), particle.radius, color);
 
         public static void DrawParticles(nint renderer, Life simulation)
         {
@@ -44,8 +44,8 @@ namespace Aether.Rendering
 
                 var rect = new SDL.FRect
                 {
-                    x = particle.position.x - particle.radius,
-                    y = particle.position.y - particle.radius,
+                    x = particle.position.X - particle.radius,
+                    y = particle.position.Y - particle.radius,
                     w = particle.radius * 2,
                     h = particle.radius * 2
                 };

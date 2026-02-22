@@ -1,4 +1,4 @@
-﻿using SDL3;
+﻿using System.Numerics;
 
 namespace Aether.Simulation
 {
@@ -6,6 +6,12 @@ namespace Aether.Simulation
     {
         public Particle[] particles;
         public ForceMatrix forceMatrix;
+
+        // Spatial Grid time
+        int gridWidth;
+        int gridHeight;
+        List<int>[,] grid;
+        List<int> neighbours = new List<int>(64);
 
         float interactionRadius;
         float forceMultiplier;
@@ -32,6 +38,15 @@ namespace Aether.Simulation
             damping = 0.95f;
             maxSpeed = 128f;
 
+            int cellSize = (int)interactionRadius;
+            gridWidth = (width + cellSize - 1) / cellSize;
+            gridHeight = (height + cellSize - 1) / cellSize;
+            grid = new List<int>[gridWidth, gridHeight];
+
+            for(int x = 0;  x < gridWidth; x++)
+                for(int y = 0; y < gridHeight; y++)
+                    grid[x, y] = new List<int>();
+
             forceMatrix = new ForceMatrix(typeCount);
             forceMatrix.SetPattern(ForcePattern.AllRepel);
 
@@ -47,7 +62,52 @@ namespace Aether.Simulation
                 float y = Random.Shared.NextSingle() * height;
                 int type = Random.Shared.Next(typeCount);
 
-                particles[i] = new Particle(new SDL.FPoint(x, y), type);
+                particles[i] = new Particle(new Vector2(x, y), type);
+            }
+        }
+
+        void BuildGrid()
+        {
+            for (int x = 0; x < gridWidth; x++)
+                for (int y = 0; y < gridHeight; y++)
+                    grid[x, y].Clear();
+
+            for(int i = 0; i < particleCount; i++)
+            {
+                int cellX = (int)(particles[i].position.X / interactionRadius);
+                int cellY = (int)(particles[i].position.Y / interactionRadius);
+
+                cellX = Math.Clamp(cellX, 0, gridWidth - 1);
+                cellY = Math.Clamp(cellY, 0, gridHeight - 1);
+
+                grid[cellX, cellY].Add(i);
+            }
+        }
+
+        void GetNeighbours(int index, List<int> result)
+        {
+            result.Clear();
+
+            Vector2 pos = particles[index].position;
+            int cellX = (int)(pos.X / interactionRadius);
+            int cellY = (int)(pos.Y / interactionRadius);
+
+            for (int dx = -1; dx <= 1; dx++)
+            {
+                for (int dy = -1; dy <= 1; dy++)
+                {
+                    int nx = cellX + dx;
+                    int ny = cellY + dy;
+
+                    if(nx >= 0 && nx < gridWidth && ny >= 0 && ny < gridHeight)
+                    {
+                        foreach(int other in grid[nx, ny])
+                        {
+                            if (other != index)
+                                result.Add(other);
+                        }
+                    }
+                }
             }
         }
 
@@ -55,28 +115,29 @@ namespace Aether.Simulation
         {
             float deltaTime = Time.fixedDeltaTime;
 
+            BuildGrid();
+
             for (int i = 0; i < particleCount; i++)
             {
-                SDL.FPoint force = SDL.FPoint.Zero;
+                Vector2 force = Vector2.Zero;
 
-                for (int j = 0; j < particleCount; j++)
+                GetNeighbours(i, neighbours);
+
+                foreach(int j in neighbours)
                 {
-                    if (i == j)
-                        continue;
-
-                    SDL.FPoint delta = particles[j].position - particles[i].position;
-                    float distanceSq = delta.LengthSquared;
+                    Vector2 delta = particles[j].position - particles[i].position;
+                    float distanceSq = delta.LengthSquared();
 
                     if (distanceSq < interactionRadius * interactionRadius && distanceSq > 0.1f)
                     {
                         float distance = MathF.Sqrt(distanceSq);
-                        SDL.FPoint direction = new SDL.FPoint(delta.x / distance, delta.y / distance);
+                        Vector2 direction = delta / distance;
 
                         float f = forceMatrix.GetForce(particles[i].type, particles[j].type);
                         float strength = f * (1 - distance / interactionRadius);
 
-                        float collisionDistance = 4f;
-                        if(distance <collisionDistance)
+                        float collisionDistance = 6f;
+                        if(distance < collisionDistance)
                         {
                             float t = 1f - (distance / collisionDistance);
                             float collisionStrength = 50f * t * t;
