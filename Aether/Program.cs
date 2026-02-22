@@ -50,6 +50,9 @@ namespace Aether
                     }
                 }
 
+                if (Input.GetKeyDown(SDL.KeyCode.Escape))
+                    running = false; // Quick escape
+
                 if (Input.GetMouseButtonDown(0))
                 {
                     clickPoints.Add(new SDL.FPoint(Input.mousePosition.X, Input.mousePosition.Y));
