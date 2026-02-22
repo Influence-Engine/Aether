@@ -3,6 +3,11 @@
     public enum ForcePattern
     {
         Default,
-        Flocking
+        Flocking,
+        PredatorPrey,
+        Symbiosis,
+        Neutral,
+        AllAttract,
+        AllRepel
     }
 }

@@ -19,38 +19,169 @@
 
         public void SetPattern(ForcePattern pattern)
         {
-            switch(pattern)
+            forces = pattern switch
             {
-                case ForcePattern.Default: // Classic *wink*
-                    forces = new float[,]
-                    {
-                        { 0.5f, -0.2f, 0.8f },
-                        { -0.2f, 0.3f, -0.5f },
-                        { 0.8f, -0.5f, 0.2f }
-                    };
-                    break;
-                case ForcePattern.Flocking:
-                    forces = new float[,]
-                    {
-                        { 1.0f, -0.5f, -0.5f },
-                        { -0.5f, 1.0f, -0.5f },
-                        { 0.5f, -0.5f, 1.0f }
-                    };
-                    break;
-            }
+                ForcePattern.Default => DefaultPattern,
+                ForcePattern.Flocking => FlockingPattern,
+                ForcePattern.PredatorPrey => PredatorPreyPattern,
+                ForcePattern.Symbiosis => SymbiosisPattern,
+                ForcePattern.Neutral => NeutralPattern,
+                ForcePattern.AllAttract => AllAttractPattern,
+                ForcePattern.AllRepel => AllRepelPattern,
+                _ => NeutralPattern
+            };
         }
 
-        public void Randomize()
+        public void Randomize(float strength = 1f)
         {
             for (int i = 0; i < typeCount; i++)
             {
                 for (int j = 0; j < typeCount; j++)
                 {
-                    forces[i, j] = (Random.Shared.NextSingle() - 0.5f) * 2.0f;
+                    forces[i, j] = (Random.Shared.NextSingle() - 0.5f) * 2.0f * strength;
                 }
             }
         }
 
         public float GetForce(int typeA, int typeB) => forces[typeA, typeB];
+
+        public float Normalized(int i, int j) => (forces[i, j] + 1f) * 0.5f;
+
+        public float[,] ToArray() => forces;
+
+        #region Patterns
+
+        public float[,] DefaultPattern
+        {
+            get
+            {
+                float[,] matrix = new float[typeCount, typeCount];
+                for(int i = 0; i < typeCount; i++)
+                {
+                    for(int j = 0; j < typeCount;j++)
+                    {
+                        if (i == j)
+                        {
+                            matrix[i, j] = 0.3f;
+                        }
+                        else
+                        {
+                            int diff = Math.Abs(i - j);
+                            matrix[i, j] = (diff % 2 == 0) ? 0.666f : -0.334f;
+                        }
+                    }
+                }
+
+                return matrix;
+            }
+        }
+
+        public float[,] FlockingPattern
+        {
+            get
+            {
+                float[,] matrix = new float[typeCount, typeCount];
+                for (int i = 0; i < typeCount; i++)
+                {
+                    for (int j = 0; j < typeCount; j++)
+                    {
+                        if (i == j)
+                        {
+                            matrix[i, j] = 1f;
+                        }
+                        else
+                        {
+                            matrix[i, j] = -0.5f;
+                        }
+                    }
+                }
+
+                return matrix;
+            }
+        }
+
+        public float[,] PredatorPreyPattern
+        {
+            get
+            {
+                float[,] matrix = new float[typeCount, typeCount];
+                for (int i = 0; i < typeCount; i++)
+                {
+                    for (int j = 0; j < typeCount; j++)
+                    {
+                        if (i == j)
+                        {
+                            matrix[i, j] = 0.1f;
+                        }
+                        else
+                        {
+                            int next = (i + 1) % typeCount;
+                            int prev = (i - 1 + typeCount) % typeCount;
+
+                            if (j == next) // Attract Prey
+                                matrix[i, j] = 0.8f;
+                            else if (j == prev) // Repel Predator
+                                matrix[i, j] = -0.8f;
+                            else
+                                matrix[i, j] = 0f;
+                        }
+                    }
+                }
+
+                return matrix;
+            }
+        }
+
+        public float[,] SymbiosisPattern
+        {
+            get
+            {
+                float[,] matrix = new float[typeCount, typeCount];
+                for (int i = 0; i < typeCount; i++)
+                {
+                    for (int j = 0; j < typeCount; j++)
+                    {
+                        if (i == j) // Mild self attraction
+                        {
+                            matrix[i, j] = 0.25f;
+                        }
+                        else
+                        {
+                            // Pair even with odd indices
+                            if (i % 2 == 0 && j == i + 1) 
+                                matrix[i, j] = 0.666f;
+                            else if (i % 2 == 1 && j == i - 1)
+                                matrix[i, j] = 0.666f;
+                            else // Repel Others
+                                matrix[i, j] = -0.334f;
+                        }
+                    }
+                }
+
+                return matrix;
+            }
+        }
+
+        public float[,] GetFilledMatrix(float value)
+        {
+            float[,] matrix = new float[typeCount, typeCount];
+            for (int i = 0; i < typeCount; i++)
+            {
+                for (int j = 0; j < typeCount; j++)
+                {
+                    matrix[i, j] = value;
+                }
+            }
+
+            return matrix;
+        }
+
+        public float[,] NeutralPattern => GetFilledMatrix(0f);
+
+        public float[,] AllAttractPattern => GetFilledMatrix(0.5f);
+
+        public float[,] AllRepelPattern => GetFilledMatrix(-0.5f);
+
+        #endregion
     }
 }
