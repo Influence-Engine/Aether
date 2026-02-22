@@ -8,8 +8,6 @@ namespace Aether
         const int width = 1280;
         const int height = 720;
 
-        static Vector2 mousePosition;
-
         static List<SDL.FPoint> clickPoints = new List<SDL.FPoint>();
 
         public static void Main(string[] args)
@@ -39,22 +37,21 @@ namespace Aether
                 float deltaTime = (currentTime - lastTime) / 1000f;
                 lastTime = currentTime;
 
+                Input.Update();
+
                 while(SDL.PollEvent(out SDL.Event e))
                 {
+                    Input.ProcessEvent(e);
+
                     if (e.type == SDL.EventType.Quit)
                     {
                         Console.WriteLine("Quit Polled");
                         running = false;
                     }
 
-                    if(e.type == SDL.EventType.MouseMotion)
-                    {
-                        mousePosition = new Vector2(e.motion.x, e.motion.y);
-                    }
-
                     if(e.type == SDL.EventType.MouseButtonDown)
                     {
-                        clickPoints.Add(new SDL.FPoint(mousePosition.X, mousePosition.Y));
+                        clickPoints.Add(new SDL.FPoint(Input.mousePosition.X, Input.mousePosition.Y));
                     }
                 }
 
