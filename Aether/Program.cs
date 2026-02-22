@@ -23,6 +23,10 @@ namespace Aether
 
             bool running = true;
 
+            float shapeX = width / 2;
+            float shapeY = height / 2;
+            float shapeRadius= 20f;
+
             while (running)
             {
                 while(SDL.PollEvent(out SDL.Event e))
@@ -36,6 +40,17 @@ namespace Aether
 
                 SDL.SetRenderDrawColor(renderer, 20, 20, 20, 255);
                 SDL.RenderClear(renderer);
+
+                SDL.SetRenderDrawColor(renderer, 0, 255, 120, 255);
+                SDL.FRect rect = new()
+                {
+                    x = shapeX - shapeRadius,
+                    y = shapeY - shapeRadius,
+                    w = shapeRadius * 2,
+                    h = shapeRadius * 2,
+                };
+
+                SDL.RenderFillRect(renderer, ref rect);
 
                 SDL.RenderPresent(renderer);
             }
