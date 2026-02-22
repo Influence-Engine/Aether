@@ -23,9 +23,8 @@ namespace Aether
 
             bool running = true;
 
-            float shapeX = width / 2;
-            float shapeY = height / 2;
-            float shapeRadius= 20f;
+            SDL.FPoint shapeCenter = new SDL.FPoint { x = width / 2, y = height / 2 };
+            float shapeRadius= 32f;
 
             while (running)
             {
@@ -41,16 +40,7 @@ namespace Aether
                 SDL.SetRenderDrawColor(renderer, 20, 20, 20, 255);
                 SDL.RenderClear(renderer);
 
-                SDL.SetRenderDrawColor(renderer, 0, 255, 120, 255);
-                SDL.FRect rect = new()
-                {
-                    x = shapeX - shapeRadius,
-                    y = shapeY - shapeRadius,
-                    w = shapeRadius * 2,
-                    h = shapeRadius * 2,
-                };
-
-                SDL.RenderFillRect(renderer, ref rect);
+                SDL.RenderCircle(renderer, shapeCenter, shapeRadius, SDL.FColor.Green);
 
                 SDL.RenderPresent(renderer);
 
