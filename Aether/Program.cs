@@ -6,11 +6,11 @@ namespace Aether
 {
     internal static class Program
     {
-        const int width = 512;
-        const int height = 512;
+        const int width = 1280;
+        const int height = 720;
 
-        const int particleCount = 7000;
-        const int typeCount = 32;
+        const int particleCount = 20000;
+        const int typeCount = 8;
 
         public static void Main(string[] args)
         {

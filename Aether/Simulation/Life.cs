@@ -7,11 +7,12 @@ namespace Aether.Simulation
         public Particle[] particles;
         public ForceMatrix forceMatrix;
 
+        readonly ThreadLocal<List<int>> threadLocalNeighbours;
+
         // Spatial Grid time
         int gridWidth;
         int gridHeight;
         List<int>[,] grid;
-        List<int> neighbours = new List<int>(64);
 
         float interactionRadius;
         float forceMultiplier;
@@ -46,6 +47,8 @@ namespace Aether.Simulation
             for(int x = 0;  x < gridWidth; x++)
                 for(int y = 0; y < gridHeight; y++)
                     grid[x, y] = new List<int>();
+
+            threadLocalNeighbours = new ThreadLocal<List<int>>(() => new List<int>(64));
 
             forceMatrix = new ForceMatrix(typeCount);
             forceMatrix.SetPattern(ForcePattern.AllRepel);
@@ -117,13 +120,16 @@ namespace Aether.Simulation
 
             BuildGrid();
 
-            for (int i = 0; i < particleCount; i++)
+            Parallel.For(0, particleCount, i =>
             {
                 Vector2 force = Vector2.Zero;
 
+                List<int> neighbours = threadLocalNeighbours.Value;
+                neighbours.Clear();
+
                 GetNeighbours(i, neighbours);
 
-                foreach(int j in neighbours)
+                foreach (int j in neighbours)
                 {
                     Vector2 delta = particles[j].position - particles[i].position;
                     float distanceSq = delta.LengthSquared();
@@ -137,7 +143,7 @@ namespace Aether.Simulation
                         float strength = f * (1 - distance / interactionRadius);
 
                         float collisionDistance = 6f;
-                        if(distance < collisionDistance)
+                        if (distance < collisionDistance)
                         {
                             float t = 1f - (distance / collisionDistance);
                             float collisionStrength = 50f * t * t;
@@ -151,7 +157,7 @@ namespace Aether.Simulation
                 }
 
                 particles[i].velocity += force * forceMultiplier * deltaTime * 100f;
-            }
+            });
 
             for (int i = 0; i < particleCount; i++)
             {
