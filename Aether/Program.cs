@@ -1,4 +1,5 @@
 ﻿using SDL3;
+using System.Numerics;
 
 namespace Aether
 {
@@ -6,6 +7,8 @@ namespace Aether
     {
         const int width = 1280;
         const int height = 720;
+
+        static Vector2 mousePosition;
 
         public static void Main(string[] args)
         {
@@ -40,6 +43,12 @@ namespace Aether
                     {
                         Console.WriteLine("Quit Polled");
                         running = false;
+                    }
+
+                    if(e.type == SDL.EventType.MouseMotion)
+                    {
+                        mousePosition = new Vector2(e.motion.x, e.motion.y);
+                        Console.WriteLine(mousePosition.ToString());
                     }
 
                     if(e.type == SDL.EventType.MouseButtonDown)
