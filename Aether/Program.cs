@@ -53,6 +53,8 @@ namespace Aether
                 SDL.RenderFillRect(renderer, ref rect);
 
                 SDL.RenderPresent(renderer);
+
+                SDL.Delay(16);
             }
 
             SDL.DestroyRenderer(renderer);
