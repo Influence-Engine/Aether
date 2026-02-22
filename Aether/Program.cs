@@ -26,8 +26,14 @@ namespace Aether
             SDL.FPoint shapeCenter = new SDL.FPoint { x = width / 2, y = height / 2 };
             float shapeRadius= 32f;
 
+            ulong lastTime = SDL.GetTicks();
+
             while (running)
             {
+                ulong currentTime = SDL.GetTicks();
+                float deltaTime = (currentTime - lastTime) / 1000f;
+                lastTime = currentTime;
+
                 while(SDL.PollEvent(out SDL.Event e))
                 {
                     if (e.type == SDL.EventType.Quit)
