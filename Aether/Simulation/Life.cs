@@ -117,44 +117,63 @@ namespace Aether.Simulation
         public void Tick()
         {
             float deltaTime = Time.fixedDeltaTime;
+            float interactionSquared = interactionRadius * interactionRadius;
+            float forcePower = forceMultiplier * deltaTime * 100f;
 
             BuildGrid();
 
             Parallel.For(0, particleCount, i =>
             {
-                SDL.FPoint force = SDL.FPoint.Zero;
+                ref Particle particle = ref particles[i];
+
+                float particleX = particle.position.x;
+                float particleY = particle.position.y;
+
+                float forceX = 0f;
+                float forceY = 0f;
 
                 List<int> neighbours = threadLocalNeighbours.Value;
                 GetNeighbours(i, neighbours);
 
                 foreach (int j in neighbours)
                 {
+                    ref Particle other = ref particles[j];
+
+                    float deltaX = other.position.x - particleX;
+                    float deltaY = other.position.y - particleY;
+
                     SDL.FPoint delta = particles[j].position - particles[i].position;
-                    float distanceSq = delta.LengthSquared;
+                    float distanceSqaured = deltaX * deltaX + deltaY * deltaY;
+                    if (distanceSqaured <= 0.1f || distanceSqaured >= interactionSquared)
+                        continue;
 
-                    if (distanceSq < interactionRadius * interactionRadius && distanceSq > 0.1f)
+                    float distance = MathF.Sqrt(distanceSqaured);
+                    float invertDistance = 1f / distance;
+
+                    float directionX = deltaX * invertDistance;
+                    float directionY = deltaY * invertDistance;
+
+                    float f = forceMatrix.GetForce(particle.type, other.type);
+                    float strength = f * (1 - distance / interactionRadius);
+
+                    float collisionDistance = 6f;
+                    if (distance < collisionDistance)
                     {
-                        float distance = MathF.Sqrt(distanceSq);
-                        SDL.FPoint direction = delta / distance;
+                        float t = 1f - (distance / collisionDistance);
+                        float collisionStrength = 50f * t * t;
 
-                        float f = forceMatrix.GetForce(particles[i].type, particles[j].type);
-                        float strength = f * (1 - distance / interactionRadius);
+                        forceX -= directionX * collisionStrength;
+                        forceY -= directionY * collisionStrength;
 
-                        float collisionDistance = 6f;
-                        if (distance < collisionDistance)
-                        {
-                            float t = 1f - (distance / collisionDistance);
-                            float collisionStrength = 50f * t * t;
-
-                            force -= direction * collisionStrength;
-                            strength *= 0.334f;
-                        }
-
-                        force += direction * strength;
+                        strength *= 0.334f;
                     }
+
+                    forceX += directionX * strength;
+                    forceY += directionY * strength;
                 }
 
-                particles[i].velocity += force * forceMultiplier * deltaTime * 100f;
+                particle.velocity.x += forceX * forcePower;
+                particle.velocity.y += forceY * forcePower;
             });
 
             for (int i = 0; i < particleCount; i++)
