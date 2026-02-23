@@ -1,7 +1,6 @@
 ﻿using Aether.Rendering;
 using Aether.Simulation;
 using SDL3;
-using System.Numerics;
 
 namespace Aether
 {
@@ -41,7 +40,7 @@ namespace Aether
             float accumulator = 0f;
 
             bool isDragging = false;
-            Vector2 lastMouseWorldPos = Vector2.Zero;
+            SDL.FPoint lastMouseWorldPos = SDL.FPoint.Zero;
 
             while (running)
             {
@@ -119,8 +118,8 @@ namespace Aether
 
                 if(isDragging && Input.GetMouseButton(2))
                 {
-                    Vector2 currentWorldPos = camera.ScreenToWorld(Input.mousePosition);
-                    Vector2 deltaWorld = currentWorldPos - lastMouseWorldPos;
+                    SDL.FPoint currentWorldPos = camera.ScreenToWorld(Input.mousePosition);
+                    SDL.FPoint deltaWorld = currentWorldPos - lastMouseWorldPos;
                     camera.Move(-deltaWorld);
                     lastMouseWorldPos = camera.ScreenToWorld(Input.mousePosition);
                 }
@@ -128,13 +127,13 @@ namespace Aether
                 float panSpeed = 500f / camera.zoom * (float)Time.deltaTime;
 
                 if (Input.GetKey(SDL.KeyCode.W))
-                    camera.Move(new Vector2(0, -panSpeed));
+                    camera.Move(new SDL.FPoint(0, -panSpeed));
                 if (Input.GetKey(SDL.KeyCode.S))
-                    camera.Move(new Vector2(0, panSpeed));
+                    camera.Move(new SDL.FPoint(0, panSpeed));
                 if (Input.GetKey(SDL.KeyCode.A))
-                    camera.Move(new Vector2(-panSpeed, 0));
+                    camera.Move(new SDL.FPoint(-panSpeed, 0));
                 if (Input.GetKey(SDL.KeyCode.D))
-                    camera.Move(new Vector2(panSpeed, 0));
+                    camera.Move(new SDL.FPoint(panSpeed, 0));
 
                 // Fixed timestep simulation
                 if (!isPaused || stepOneTick)

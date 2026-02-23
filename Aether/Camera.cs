@@ -1,12 +1,11 @@
 ﻿using SDL3;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace Aether
 {
     public class Camera
     {
-        public Vector2 position;
+        public SDL.FPoint position;
         public float zoom = 1f;
 
         public int ScreenWidth { get; private set; }
@@ -15,15 +14,15 @@ namespace Aether
         public float WorldWidth => ScreenWidth / zoom;
         public float WorldHeight => ScreenHeight / zoom;
 
-        public Vector2 minBounds;
-        public Vector2 maxBounds;
+        public SDL.FPoint minBounds;
+        public SDL.FPoint maxBounds;
         public bool useBounds = false;
 
         public Camera(int screenWidth, int screenHeight)
         {
             this.ScreenWidth = screenWidth;
             this.ScreenHeight = screenHeight;
-            position = new Vector2(screenWidth * 0.5f, screenHeight * 0.5f);
+            position = new SDL.FPoint(screenWidth * 0.5f, screenHeight * 0.5f);
         }
 
         public void Resize(int width, int height)
@@ -33,79 +32,68 @@ namespace Aether
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector2 WorldToScreen(Vector2 worldPos)
+        public SDL.FPoint WorldToScreen(SDL.FPoint worldPos)
         {
-            return new Vector2(
-                (worldPos.X - position.X) * zoom + (ScreenWidth * 0.5f),
-                (worldPos.Y - position.Y) * zoom + (ScreenHeight * 0.5f));
+            return new SDL.FPoint(
+                (worldPos.x - position.x) * zoom + (ScreenWidth * 0.5f),
+                (worldPos.y - position.y) * zoom + (ScreenHeight * 0.5f));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector2 WorldToScreen(SDL.FPoint worldPos)
+        public SDL.FPoint ScreenToWorld(SDL.FPoint screenPos)
         {
-            return new Vector2(
-                (worldPos.x - position.X) * zoom + (ScreenWidth * 0.5f),
-                (worldPos.y - position.Y) * zoom + (ScreenHeight * 0.5f));
+            return new SDL.FPoint(
+                (screenPos.x - ScreenWidth * 0.5f) / zoom + position.x,
+                (screenPos.y - ScreenWidth * 0.5f) / zoom + position.y);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector2 ScreenToWorld(Vector2 screenPos)
+        public void Move(SDL.FPoint delta)
         {
-            return new Vector2(
-                (screenPos.X - ScreenWidth * 0.5f) / zoom + position.X,
-                (screenPos.Y - ScreenWidth * 0.5f) / zoom + position.Y);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector2 ScreenToWorld(SDL.FPoint screenPos) => ScreenToWorld(new Vector2(screenPos.x, screenPos.y));
-
-        public void Move(Vector2 delta)
-        {
-            Vector2 newPos = position + delta;
+            SDL.FPoint newPos = position + delta;
 
             if(useBounds)
             {
-                newPos.X = Math.Clamp(newPos.X, minBounds.X + WorldWidth * 0.5f, maxBounds.X - WorldWidth * 0.5f);
-                newPos.Y = Math.Clamp(newPos.Y, minBounds.Y + WorldHeight * 0.5f, maxBounds.Y - WorldHeight * 0.5f);
+                newPos.x = Math.Clamp(newPos.x, minBounds.x + WorldWidth * 0.5f, maxBounds.x - WorldWidth * 0.5f);
+                newPos.y = Math.Clamp(newPos.y, minBounds.y + WorldHeight * 0.5f, maxBounds.y - WorldHeight * 0.5f);
             }
 
             position = newPos;
         }
 
-        public void SetPosition(Vector2 worldPos)
+        public void SetPosition(SDL.FPoint worldPos)
         {
             if (useBounds)
             {
-                worldPos.X = Math.Clamp(worldPos.X, minBounds.X + WorldWidth * 0.5f, maxBounds.X - WorldWidth * 0.5f);
-                worldPos.Y = Math.Clamp(worldPos.Y, minBounds.Y + WorldHeight * 0.5f, maxBounds.Y - WorldHeight * 0.5f);
+                worldPos.x = Math.Clamp(worldPos.x, minBounds.x + WorldWidth * 0.5f, maxBounds.x - WorldWidth * 0.5f);
+                worldPos.y = Math.Clamp(worldPos.y, minBounds.y + WorldHeight * 0.5f, maxBounds.y - WorldHeight * 0.5f);
             }
 
             position = worldPos;
         }
 
-        public (Vector2 min, Vector2 max) GetVisibleBounds()
+        public (SDL.FPoint min, SDL.FPoint max) GetVisibleBounds()
         {
-            Vector2 center = position;
+            SDL.FPoint center = position;
             float halfWidth = WorldWidth * 0.5f;
             float halfHeight = WorldHeight * 0.5f;
 
             return (
-                new Vector2(center.X - halfWidth, center.Y - halfHeight),
-                new Vector2(center.X + halfWidth, center.Y + halfHeight));
+                new SDL.FPoint(center.x - halfWidth, center.y - halfHeight),
+                new SDL.FPoint(center.x + halfWidth, center.y + halfHeight));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsVisible(Vector2 worldPos, float radius)
+        public bool IsVisible(SDL.FPoint worldPos, float radius)
         {
-            (Vector2 min, Vector2 max) = GetVisibleBounds();
+            (SDL.FPoint min, SDL.FPoint max) = GetVisibleBounds();
 
-            min.X -= radius;
-            min.Y -= radius;
-            max.X += radius;
-            max.Y += radius;
+            min.x -= radius;
+            min.y -= radius;
+            max.x += radius;
+            max.y += radius;
 
-            return worldPos.X >= min.X && worldPos.X <= max.X &&
-                worldPos.Y >= min.Y && worldPos.Y <= max.Y;
+            return worldPos.x >= min.x && worldPos.x <= max.x &&
+                worldPos.y >= min.y && worldPos.y <= max.y;
         }
     }
 }

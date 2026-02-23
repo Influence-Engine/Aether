@@ -1,6 +1,5 @@
 ﻿using Aether.Simulation;
 using SDL3;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace Aether.Rendering
@@ -118,13 +117,13 @@ namespace Aether.Rendering
                     if (particle.type != type)
                         continue;
 
-                    if (particle.position.x + particle.radius < visibleMin.X ||
-                        particle.position.x - particle.radius > visibleMax.X ||
-                        particle.position.y + particle.radius < visibleMin.Y ||
-                        particle.position.y - particle.radius > visibleMax.Y)
+                    if (particle.position.x + particle.radius < visibleMin.x ||
+                        particle.position.x - particle.radius > visibleMax.x ||
+                        particle.position.y + particle.radius < visibleMin.y ||
+                        particle.position.y - particle.radius > visibleMax.y)
                         continue;
 
-                    Vector2 screenPos = camera.WorldToScreen(particle.position);
+                    SDL.FPoint screenPos = camera.WorldToScreen(particle.position);
 
                     float screenRadius = particle.radius * camera.zoom;
                     if (screenRadius < 0.5f)
@@ -140,8 +139,8 @@ namespace Aether.Rendering
 
                     rectBuffer[rectCount++] = new SDL.FRect
                     {
-                        x = screenPos.X - screenRadius,
-                        y = screenPos.Y - screenRadius,
+                        x = screenPos.x - screenRadius,
+                        y = screenPos.y - screenRadius,
                         w = screenRadius * 2,
                         h = screenRadius * 2
                     };
