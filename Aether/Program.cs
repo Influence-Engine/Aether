@@ -10,7 +10,7 @@ namespace Aether
         const int width = 1920;
         const int height = 1080;
 
-        const int particleCount = 50000;
+        const int particleCount = 80000;
         const int typeCount = 5;
 
         public static void Main(string[] args)

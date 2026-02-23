@@ -41,6 +41,14 @@ namespace Aether
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Vector2 WorldToScreen(SDL.FPoint worldPos)
+        {
+            return new Vector2(
+                (worldPos.x - position.X) * zoom + (ScreenWidth * 0.5f),
+                (worldPos.y - position.Y) * zoom + (ScreenHeight * 0.5f));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector2 ScreenToWorld(Vector2 screenPos)
         {
             return new Vector2(
