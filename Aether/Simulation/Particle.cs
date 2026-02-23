@@ -47,7 +47,7 @@ namespace Aether.Simulation
             }
             else if(position.X > width - edgeDistance) // Right Edge
             {
-                float t = (position.X / (width - edgeDistance)) / edgeDistance;
+                float t = (position.X - (width - edgeDistance)) / edgeDistance;
                 velocity.X -= t * edgeForce * deltaTime;
             }
 
@@ -58,7 +58,7 @@ namespace Aether.Simulation
             }
             else if(position.Y > height - edgeDistance)
             {
-                float t = (position.Y - (height -edgeDistance)) / edgeDistance;
+                float t = (position.Y - (height - edgeDistance)) / edgeDistance;
                 velocity.Y -= t * edgeForce * deltaTime;
             }
         }
