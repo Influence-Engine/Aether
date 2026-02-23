@@ -125,8 +125,6 @@ namespace Aether.Simulation
                 SDL.FPoint force = SDL.FPoint.Zero;
 
                 List<int> neighbours = threadLocalNeighbours.Value;
-                neighbours.Clear();
-
                 GetNeighbours(i, neighbours);
 
                 foreach (int j in neighbours)
