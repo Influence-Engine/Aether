@@ -1,5 +1,6 @@
 ﻿using Aether.Simulation;
 using SDL3;
+using Essence;
 using System.Runtime.CompilerServices;
 
 namespace Aether.Rendering
@@ -17,10 +18,10 @@ namespace Aether.Rendering
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DrawParticle(nint renderer, ref Particle particle) => SDL.RenderCircle(renderer, particle.position, particle.radius, GetColorForType(particle.type));
+        public static void DrawParticle(nint renderer, ref Particle particle) => SDL.RenderCircle(renderer, new SDL.FPoint(particle.position.x, particle.position.y), particle.radius, GetColorForType(particle.type));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void DrawParticle(nint renderer, ref Particle particle, SDL.FColor color) => SDL.RenderCircle(renderer, particle.position, particle.radius, color);
+        public static void DrawParticle(nint renderer, ref Particle particle, SDL.FColor color) => SDL.RenderCircle(renderer, new SDL.FPoint(particle.position.x, particle.position.y), particle.radius, color);
 
         public static void DrawParticles(nint renderer, Life simulation)
         {
@@ -123,7 +124,7 @@ namespace Aether.Rendering
                         particle.position.y - particle.radius > visibleMax.y)
                         continue;
 
-                    SDL.FPoint screenPos = camera.WorldToScreen(particle.position);
+                    Vector2 screenPos = camera.WorldToScreen(particle.position);
 
                     float screenRadius = particle.radius * camera.zoom;
                     if (screenRadius < 0.5f)

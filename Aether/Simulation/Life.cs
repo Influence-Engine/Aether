@@ -1,4 +1,4 @@
-﻿using SDL3;
+﻿using Essence;
 
 namespace Aether.Simulation
 {
@@ -52,7 +52,7 @@ namespace Aether.Simulation
                 float y = Random.Shared.NextSingle() * height;
                 int type = Random.Shared.Next(typeCount);
 
-                particles[i] = new Particle(new SDL.FPoint(x, y), type);
+                particles[i] = new Particle(new Vector2(x, y), type);
             }
         }
 

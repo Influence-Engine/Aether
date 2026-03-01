@@ -1,20 +1,20 @@
-﻿using SDL3;
+﻿using Essence;
 
 namespace Aether.Simulation
 {
     public struct Particle
     {
-        public SDL.FPoint position;
-        public SDL.FPoint velocity;
+        public Vector2 position;
+        public Vector2 velocity;
 
         public float radius;
 
         public int type;
 
-        public Particle(SDL.FPoint position, int type, float radius = 1f)
+        public Particle(Vector2 position, int type, float radius = 1f)
         {
             this.position = position;
-            this.velocity = SDL.FPoint.Zero;
+            this.velocity = Vector2.Zero;
             this.radius = radius;
             this.type = type;
         }
@@ -25,8 +25,8 @@ namespace Aether.Simulation
             velocity *= damping;
 
             // Speed limit
-            if (velocity.LengthSquared > maxSpeed * maxSpeed)
-                velocity = SDL.FPoint.Normalize(velocity) * maxSpeed;
+            if (velocity.SqrMagnitude > maxSpeed * maxSpeed)
+                velocity = velocity.Normalized * maxSpeed;
 
             float edgeForce = 100f;
             float edgeDistance = 50f;

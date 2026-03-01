@@ -9,16 +9,41 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="SDL3-CS">
-      <HintPath>SDL3-CS.dll</HintPath>
-    </Reference>
+	  <Reference Include="SDL3-CS">
+		  <HintPath>Managed\Assemblies\SDL3-CS.dll</HintPath>
+		  <Private>false</Private>
+	  </Reference>
+	  <Reference Include="Essence">
+		  <HintPath>Managed\Assemblies\Essence.dll</HintPath>
+		  <Private>false</Private>
+	  </Reference>
   </ItemGroup>
 
+	<ItemGroup>
+		<None Include="..\License">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<TargetPath>Managed\Licenses\Aether.txt</TargetPath>
+		</None>
+	</ItemGroup>
+
   <ItemGroup>
-    <None Update="SDL3-CS.dll">
+    <None Update="Managed\Assemblies\Essence.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="SDL3.dll">
+    <None Update="Managed\Assemblies\SDL3-CS.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Managed\Assemblies\SDL3.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+	  
+    <None Update="Managed\Licenses\Essence.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Managed\Licenses\SDL3-CS.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Managed\Licenses\SDL3.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

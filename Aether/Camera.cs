@@ -1,11 +1,11 @@
-﻿using SDL3;
+﻿using Essence;
 using System.Runtime.CompilerServices;
 
 namespace Aether
 {
     public class Camera
     {
-        public SDL.FPoint position;
+        public Vector2 position;
         public float zoom = 1f;
 
         public int ScreenWidth { get; private set; }
@@ -14,15 +14,15 @@ namespace Aether
         public float WorldWidth => ScreenWidth / zoom;
         public float WorldHeight => ScreenHeight / zoom;
 
-        public SDL.FPoint minBounds;
-        public SDL.FPoint maxBounds;
+        public Vector2 minBounds;
+        public Vector2 maxBounds;
         public bool useBounds = false;
 
         public Camera(int screenWidth, int screenHeight)
         {
             this.ScreenWidth = screenWidth;
             this.ScreenHeight = screenHeight;
-            position = new SDL.FPoint(screenWidth * 0.5f, screenHeight * 0.5f);
+            position = new Vector2(screenWidth * 0.5f, screenHeight * 0.5f);
         }
 
         public void Resize(int width, int height)
@@ -32,24 +32,24 @@ namespace Aether
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SDL.FPoint WorldToScreen(SDL.FPoint worldPos)
+        public Vector2 WorldToScreen(Vector2 worldPos)
         {
-            return new SDL.FPoint(
+            return new Vector2(
                 (worldPos.x - position.x) * zoom + (ScreenWidth * 0.5f),
                 (worldPos.y - position.y) * zoom + (ScreenHeight * 0.5f));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SDL.FPoint ScreenToWorld(SDL.FPoint screenPos)
+        public Vector2 ScreenToWorld(Vector2 screenPos)
         {
-            return new SDL.FPoint(
+            return new Vector2(
                 (screenPos.x - ScreenWidth * 0.5f) / zoom + position.x,
                 (screenPos.y - ScreenWidth * 0.5f) / zoom + position.y);
         }
 
-        public void Move(SDL.FPoint delta)
+        public void Move(Vector2 delta)
         {
-            SDL.FPoint newPos = position + delta;
+             Vector2 newPos = position + delta;
 
             if(useBounds)
             {
@@ -60,7 +60,7 @@ namespace Aether
             position = newPos;
         }
 
-        public void SetPosition(SDL.FPoint worldPos)
+        public void SetPosition(Vector2 worldPos)
         {
             if (useBounds)
             {
@@ -71,21 +71,21 @@ namespace Aether
             position = worldPos;
         }
 
-        public (SDL.FPoint min, SDL.FPoint max) GetVisibleBounds()
+        public (Vector2 min, Vector2 max) GetVisibleBounds()
         {
-            SDL.FPoint center = position;
+            Vector2 center = position;
             float halfWidth = WorldWidth * 0.5f;
             float halfHeight = WorldHeight * 0.5f;
 
             return (
-                new SDL.FPoint(center.x - halfWidth, center.y - halfHeight),
-                new SDL.FPoint(center.x + halfWidth, center.y + halfHeight));
+                new Vector2(center.x - halfWidth, center.y - halfHeight),
+                new Vector2(center.x + halfWidth, center.y + halfHeight));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsVisible(SDL.FPoint worldPos, float radius)
+        public bool IsVisible(Vector2 worldPos, float radius)
         {
-            (SDL.FPoint min, SDL.FPoint max) = GetVisibleBounds();
+            (Vector2 min, Vector2 max) = GetVisibleBounds();
 
             min.x -= radius;
             min.y -= radius;
