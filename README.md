@@ -15,12 +15,12 @@ This project is intended to create as many Particles by leveraging the CPU. (Com
 
 
 
-Size: 480x480  
-Particle Count: 2500  
-Type Count: 5  
-Force Matrix: Randomized
+Size: 512x512  
+Particle Count: 30000  
+Type Count: 6  
+Force Matrix: Randomized  
+![Simulation 512](https://github.com/user-attachments/assets/3503583f-1913-4918-b0d9-072a6e893238)  
 
-https://github.com/user-attachments/assets/20780808-8d29-4171-bf07-8b1a284c4f75
 
 ## Made With
 - C# and .NET
