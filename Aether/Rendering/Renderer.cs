@@ -79,7 +79,7 @@ namespace Aether.Rendering
                     if(rectCount >= rectBuffer.Length)
                     {
                         if (rectCount > 0)
-                            SDL.RenderFillRects(renderer, rectBuffer, rectCount);
+                            SDL.RenderFillRects(renderer, rectBuffer);
 
                         rectCount = 0;
                     }
@@ -94,7 +94,7 @@ namespace Aether.Rendering
                 }
 
                 if (rectCount > 0)
-                    SDL.RenderFillRects(renderer, rectBuffer, rectCount);
+                    SDL.RenderFillRects(renderer, rectBuffer);
             }
         }
 
@@ -133,7 +133,7 @@ namespace Aether.Rendering
                     if (rectCount >= rectBuffer.Length)
                     {
                         if (rectCount > 0)
-                            SDL.RenderFillRects(renderer, rectBuffer, rectCount);
+                            SDL.RenderFillRects(renderer, rectBuffer);
 
                         rectCount = 0;
                     }
@@ -148,7 +148,7 @@ namespace Aether.Rendering
                 }
 
                 if (rectCount > 0)
-                    SDL.RenderFillRects(renderer, rectBuffer, rectCount);
+                    SDL.RenderFillRects(renderer, rectBuffer);
             }
         }
 
