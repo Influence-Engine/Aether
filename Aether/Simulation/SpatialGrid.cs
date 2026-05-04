@@ -4,92 +4,90 @@
     {
         readonly int width;
         readonly int height;
+        public readonly float CellSize;
 
-        readonly int gridWidth;
-        public int GridWidth => gridWidth;
-        readonly int gridHeight;
-        public int GridHeight => gridHeight;
+        public int GridWidth { get; }
+        public int GridHeight { get; }
+        public int CellCount { get; }
 
-        readonly float cellSize;
-        public float CellSize => cellSize;
-        readonly int cellCount;
-        public int CellCount => cellCount;
 
-        readonly int[] gridHeads;
-        public int[] GridHeads => gridHeads;
-        readonly int[] next;
-        public int[] Next => next;
+        public int[] cellStarts;
+        public int[] cellEnds;
+        public int[] cellIndices;
+
+        int[] cellCounts;
 
         public SpatialGrid(int width, int height, float cellSize, int maxCount)
         {
             this.width = width;
             this.height = height;
-            this.cellSize = cellSize;
+            CellSize = cellSize;
 
-            gridWidth = (int)((width + cellSize - 1) / cellSize);
-            gridHeight = (int)((height + cellSize - 1) / cellSize);
-            cellCount = gridWidth * gridHeight;
+            GridWidth = (int)((width + cellSize - 1) / cellSize);
+            GridHeight = (int)((height + cellSize - 1) / cellSize);
+            CellCount = GridWidth * GridHeight;
 
-            gridHeads = new int[cellCount];
-            next = new int[maxCount];
-
-            Clear();
+            cellStarts = new int[CellCount];
+            cellEnds = new int[CellCount];
+            cellIndices = new int[maxCount];
+            cellCounts = new int[CellCount];
         }
 
-        public void Insert(int index, float x, float y)
+        public void Build(Particle[] particles, int particleCount)
         {
-            int cellX = (int)(x / cellSize);
-            int cellY = (int)(y / cellSize);
+            Array.Clear(cellCounts, 0, CellCount);
 
-            if (cellX < 0) cellX = 0;
-            else if (cellX >= gridWidth) cellX = gridWidth - 1;
-
-            if (cellY < 0) cellY = 0;
-            else if (cellY >= gridHeight) cellY = gridHeight - 1;
-
-            int cellIndex = cellY * gridWidth + cellX;
-
-            next[index] = gridHeads[cellIndex];
-            gridHeads[cellIndex] = index;
-        }
-
-        // callback causes GC triggers, so we do it manually instead <.<
-        public void ForEachNeighbour(float x, float y, float radius, Action<int> callback)
-        {
-            int minX = (int)((x - radius) / cellSize);
-            int maxX = (int)((x + radius) / cellSize);
-
-            int minY = (int)((y - radius) / cellSize);
-            int maxY = (int)((y + radius) / cellSize);
-
-            if (minX < 0) minX = 0;
-            if (maxX >= gridWidth) maxX = gridWidth - 1;
-
-            if (minY < 0) minY = 0;
-            if (maxY >= gridHeight) maxY = gridHeight - 1;
-
-            for (int cx = minX; cx <= maxX; cx++)
+            for(int i = 0; i < particleCount; i++)
             {
-                for (int cy = minY; cy <= maxY; cy++)
-                {
-                    int cellIndex = cy * gridWidth + cx;
-                    int j = gridHeads[cellIndex];
+                ref Particle p = ref particles[i];
+                int cx = ClampCellX((int)(p.position.X / CellSize));
+                int cy = ClampCellY((int)(p.position.Y / CellSize));
+                int bucket = cy * GridWidth + cx;
+                cellCounts[bucket]++;
+            }
 
-                    while(j !=  -1)
-                    {
-                        callback(j);
-                        j = next[j];
-                    }
-                }
+            int total = 0;
+            for(int b = 0; b < CellCount; b++)
+            {
+                cellStarts[b] = total;
+                total += cellCounts[b];
+                cellEnds[b] = total;
+            }
+
+            Array.Copy(cellStarts, cellCounts, CellCount);
+
+            for(int i = 0; i < particleCount; i++)
+            {
+                ref Particle p = ref particles[i];
+                int cx = ClampCellX((int)(p.position.X / CellSize));
+                int cy = ClampCellY((int)(p.position.Y / CellSize));
+                int bucket = cy * GridWidth + cx;
+                int slot = cellCounts[bucket]++;
+                cellIndices[slot] = i;
             }
         }
 
-        public void Clear()
+        int ClampCellX(int cx)
         {
-            for(int i = 0; i < cellCount; i++)
-                gridHeads[i] = -1;
+            if (cx < 0)
+                return 0;
+
+            if (cx >= GridWidth)
+                return GridWidth - 1;
+
+            return cx;
         }
 
+        int ClampCellY(int cy)
+        {
+            if (cy < 0)
+                return 0;
+
+            if (cy >= GridHeight)
+                return GridHeight - 1;
+
+            return cy;
+        }
 
     }
 }

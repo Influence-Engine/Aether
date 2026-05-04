@@ -58,24 +58,13 @@ namespace Aether.Simulation
             }
         }
 
-        void BuildGrid()
-        {
-            grid.Clear();
-
-            for(int i = 0; i < particleCount; i++)
-            {
-                ref Particle particle = ref particles[i];
-                grid.Insert(i, particle.position.X, particle.position.Y);
-            }
-        }
-
         public void Tick()
         {
             float deltaTime = Time.fixedDeltaTime;
             float interactionSquared = interactionRadius * interactionRadius;
             float forcePower = forceMultiplier * deltaTime * 100f;
 
-            BuildGrid();
+            grid.Build(particles, particleCount);
 
             Parallel.For(0, ParticleCount, i =>
             {
@@ -97,59 +86,53 @@ namespace Aether.Simulation
                 if (minY < 0) minY = 0;
                 if (maxY >= grid.GridHeight) maxY = grid.GridHeight - 1;
 
-                for (int cx = minX; cx <= maxX; cx++)
+                for (int cy = minY; cy <= maxY; cy++)
                 {
-                    for (int cy = minY; cy <= maxY; cy++)
+                    int rowStart = cy * grid.GridWidth;
+                    for (int cx = minX; cx <= maxX; cx++)
                     {
-                        int cellIndex = cy * grid.GridWidth + cx;
-                        int j = grid.GridHeads[cellIndex];
+                        int bucket = rowStart + cx;
+                        int start = grid.cellStarts[bucket];
+                        int end = grid.cellEnds[bucket];
 
-                        while (j != -1)
+                        for(int k = start; k < end;  k++)
                         {
-                            if (j != i) // skip self
+                            int j = grid.cellIndices[k];
+                            if (j == i) // Skip self
+                                continue;
+
+                            ref Particle other = ref particles[j];
+
+                            float deltaX = other.position.X - particleX;
+                            float deltaY = other.position.Y - particleY;
+
+                            float distSq = deltaX * deltaX + deltaY * deltaY;
+                            if (distSq <= 0.1f || distSq >= interactionSquared)
+                                continue;
+
+                            float invertDistance = FastInvSqrt(distSq);
+                            float distance = 1f / invertDistance;
+
+                            float directionX = deltaX * invertDistance;
+                            float directionY = deltaY * invertDistance;
+
+                            float f = forceMatrix.GetForce(particle.type, other.type);
+                            float strength = f * (1 - distance / interactionRadius);
+
+                            const float collisionDistance = 6f;
+                            if (distance < collisionDistance)
                             {
-                                ref Particle other = ref particles[j];
+                                float t = 1f - (distance / collisionDistance);
+                                float collisionStrength = 50f * t * t;
 
-                                float deltaX = other.position.X - particleX;
-                                float deltaY = other.position.Y - particleY;
+                                forceX -= directionX * collisionStrength;
+                                forceY -= directionY * collisionStrength;
 
-                                float distanceSquared = deltaX * deltaX + deltaY * deltaY;
-                                if (distanceSquared <= 0.1f || distanceSquared >= interactionSquared)
-                                {
-                                    j = grid.Next[j];
-                                    continue;
-                                }
-
-                                //float distance = MathF.Sqrt(distanceSquared);
-                                //float invertDistance = 1f / distance;
-
-                                float invertDistance = FastInvSqrt(distanceSquared);
-                                float distance = 1f / invertDistance;
-
-
-                                float directionX = deltaX * invertDistance;
-                                float directionY = deltaY * invertDistance;
-
-                                float f = forceMatrix.GetForce(particle.type, other.type);
-                                float strength = f * (1 - distance / interactionRadius);
-
-                                float collisionDistance = 6f;
-                                if (distance < collisionDistance)
-                                {
-                                    float t = 1f - (distance / collisionDistance);
-                                    float collisionStrength = 50f * t * t;
-
-                                    forceX -= directionX * collisionStrength;
-                                    forceY -= directionY * collisionStrength;
-
-                                    strength *= 0.334f;
-                                }
-
-                                forceX += directionX * strength;
-                                forceY += directionY * strength;
+                                strength *= 0.334f;
                             }
 
-                            j = grid.Next[j];
+                            forceX += directionX * strength;
+                            forceY += directionY * strength;
                         }
                     }
                 }
