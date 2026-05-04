@@ -9,7 +9,7 @@ namespace Aether.Rendering
     {
         static SDL.FColor[] colorCache = new SDL.FColor[64];
 
-        static SDL.FRect[] rectBuffer = new SDL.FRect[2048];
+        static Vector4[] rectBuffer = new Vector4[2048];
 
         static Renderer()
         {
@@ -35,74 +35,12 @@ namespace Aether.Rendering
             }
         }
 
-        public static void DrawParticlesRect(nint renderer, Life simulation)
-        {
-            var particles = simulation.particles;
-            int count = simulation.ParticleCount;
-
-            for (int i = 0; i < count; i++)
-            {
-                ref Particle particle = ref particles[i];
-                SDL.FColor color = GetColorForType(particle.type);
-
-                var rect = new SDL.FRect
-                {
-                    x = particle.position.X - particle.radius,
-                    y = particle.position.Y - particle.radius,
-                    w = particle.radius * 2,
-                    h = particle.radius * 2
-                };
-
-                SDL.SetRenderDrawColor(renderer, (byte)(color.r * 255), (byte)(color.g * 255), (byte)(color.b * 255), (byte)(color.a * 255));
-                SDL.RenderRect(renderer, ref rect);
-            }
-        }
-        
-        public static void DrawParticleRectBatch(nint renderer, Life simulation)
-        {
-            var particles = simulation.particles;
-            int count = simulation.ParticleCount;
-
-            for(int type = 0; type < simulation.TypeCount; type++)
-            {
-                SDL.FColor color = GetColorForType(type);
-                SDL.SetRenderDrawColor(renderer, (byte)(color.r * 255), (byte)(color.g * 255), (byte)(color.b * 255), (byte)(color.a * 255));
-
-                int rectCount = 0;
-
-                for(int i = 0; i < count; i++)
-                {
-                    ref Particle particle = ref particles[i];
-                    if (particle.type != type)
-                        continue;
-
-                    if(rectCount >= rectBuffer.Length)
-                    {
-                        if (rectCount > 0)
-                            SDL.RenderFillRects(renderer, rectBuffer);
-
-                        rectCount = 0;
-                    }
-
-                    rectBuffer[rectCount++] = new SDL.FRect
-                    {
-                        x = particle.position.X - particle.radius,
-                        y = particle.position.Y - particle.radius,
-                        w = particle.radius * 2,
-                        h = particle.radius * 2
-                    };
-                }
-
-                if (rectCount > 0)
-                    SDL.RenderFillRects(renderer, rectBuffer);
-            }
-        }
-
         public static void DrawParticleRectBatch(nint renderer, Life simulation, Camera camera)
         {
             var particles = simulation.particles;
             int count = simulation.ParticleCount;
 
+            float zoom = camera.zoom;
             var (visibleMin, visibleMax) = camera.GetVisibleBounds();
 
             for (int type = 0; type < simulation.TypeCount; type++)
@@ -126,25 +64,24 @@ namespace Aether.Rendering
 
                     Vector2 screenPos = camera.WorldToScreen(particle.position);
 
-                    float screenRadius = particle.radius * camera.zoom;
+                    float screenRadius = particle.radius * zoom;
                     if (screenRadius < 0.5f)
                         continue;
 
                     if (rectCount >= rectBuffer.Length)
                     {
-                        if (rectCount > 0)
-                            SDL.RenderFillRects(renderer, rectBuffer);
-
+                        SDL.RenderFillRects(renderer, rectBuffer);
                         rectCount = 0;
                     }
 
-                    rectBuffer[rectCount++] = new SDL.FRect
+                    rectBuffer[rectCount] = new Vector4
                     {
-                        x = screenPos.X - screenRadius,
-                        y = screenPos.Y - screenRadius,
-                        w = screenRadius * 2,
-                        h = screenRadius * 2
+                        X = screenPos.X - screenRadius,
+                        Y = screenPos.Y - screenRadius,
+                        Z = screenRadius * 2,
+                        W = screenRadius * 2
                     };
+                    rectCount++;
                 }
 
                 if (rectCount > 0)
