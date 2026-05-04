@@ -1,4 +1,4 @@
-﻿using Essence;
+﻿using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace Aether
@@ -35,16 +35,16 @@ namespace Aether
         public Vector2 WorldToScreen(Vector2 worldPos)
         {
             return new Vector2(
-                (worldPos.x - position.x) * zoom + (ScreenWidth * 0.5f),
-                (worldPos.y - position.y) * zoom + (ScreenHeight * 0.5f));
+                (worldPos.X - position.X) * zoom + (ScreenWidth * 0.5f),
+                (worldPos.Y - position.Y) * zoom + (ScreenHeight * 0.5f));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector2 ScreenToWorld(Vector2 screenPos)
         {
             return new Vector2(
-                (screenPos.x - ScreenWidth * 0.5f) / zoom + position.x,
-                (screenPos.y - ScreenWidth * 0.5f) / zoom + position.y);
+                (screenPos.X - ScreenWidth * 0.5f) / zoom + position.X,
+                (screenPos.Y - ScreenWidth * 0.5f) / zoom + position.Y);
         }
 
         public void Move(Vector2 delta)
@@ -53,8 +53,8 @@ namespace Aether
 
             if(useBounds)
             {
-                newPos.x = Math.Clamp(newPos.x, minBounds.x + WorldWidth * 0.5f, maxBounds.x - WorldWidth * 0.5f);
-                newPos.y = Math.Clamp(newPos.y, minBounds.y + WorldHeight * 0.5f, maxBounds.y - WorldHeight * 0.5f);
+                newPos.X = Math.Clamp(newPos.X, minBounds.X + WorldWidth * 0.5f, maxBounds.X - WorldWidth * 0.5f);
+                newPos.Y = Math.Clamp(newPos.Y, minBounds.Y + WorldHeight * 0.5f, maxBounds.Y - WorldHeight * 0.5f);
             }
 
             position = newPos;
@@ -64,8 +64,8 @@ namespace Aether
         {
             if (useBounds)
             {
-                worldPos.x = Math.Clamp(worldPos.x, minBounds.x + WorldWidth * 0.5f, maxBounds.x - WorldWidth * 0.5f);
-                worldPos.y = Math.Clamp(worldPos.y, minBounds.y + WorldHeight * 0.5f, maxBounds.y - WorldHeight * 0.5f);
+                worldPos.X = Math.Clamp(worldPos.X, minBounds.X + WorldWidth * 0.5f, maxBounds.X - WorldWidth * 0.5f);
+                worldPos.Y = Math.Clamp(worldPos.Y, minBounds.Y + WorldHeight * 0.5f, maxBounds.Y - WorldHeight * 0.5f);
             }
 
             position = worldPos;
@@ -78,8 +78,8 @@ namespace Aether
             float halfHeight = WorldHeight * 0.5f;
 
             return (
-                new Vector2(center.x - halfWidth, center.y - halfHeight),
-                new Vector2(center.x + halfWidth, center.y + halfHeight));
+                new Vector2(center.X - halfWidth, center.Y - halfHeight),
+                new Vector2(center.X + halfWidth, center.Y + halfHeight));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -87,13 +87,13 @@ namespace Aether
         {
             (Vector2 min, Vector2 max) = GetVisibleBounds();
 
-            min.x -= radius;
-            min.y -= radius;
-            max.x += radius;
-            max.y += radius;
+            min.X -= radius;
+            min.Y -= radius;
+            max.X += radius;
+            max.Y += radius;
 
-            return worldPos.x >= min.x && worldPos.x <= max.x &&
-                worldPos.y >= min.y && worldPos.y <= max.y;
+            return worldPos.X >= min.X && worldPos.X <= max.X &&
+                worldPos.Y >= min.Y && worldPos.Y <= max.Y;
         }
     }
 }

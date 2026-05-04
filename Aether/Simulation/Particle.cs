@@ -1,4 +1,4 @@
-﻿using Essence;
+﻿using System.Numerics;
 
 namespace Aether.Simulation
 {
@@ -25,32 +25,32 @@ namespace Aether.Simulation
             velocity *= damping;
 
             // Speed limit
-            if (velocity.SqrMagnitude > maxSpeed * maxSpeed)
-                velocity = velocity.Normalized * maxSpeed;
+            if (velocity.LengthSquared() > maxSpeed * maxSpeed)
+                velocity = Vector2.Normalize(velocity) * maxSpeed;
 
             float edgeForce = 100f;
             float edgeDistance = 50f;
 
-            if(position.x < edgeDistance) // Left Edge
+            if(position.X < edgeDistance) // Left Edge
             {
-                float t = 1f - (position.x / edgeDistance);
-                velocity.x += t * edgeForce * deltaTime;
+                float t = 1f - (position.X / edgeDistance);
+                velocity.X+= t * edgeForce * deltaTime;
             }
-            else if(position.x > width - edgeDistance) // Right Edge
+            else if(position.X > width - edgeDistance) // Right Edge
             {
-                float t = (position.x - (width - edgeDistance)) / edgeDistance;
-                velocity.x -= t * edgeForce * deltaTime;
+                float t = (position.X - (width - edgeDistance)) / edgeDistance;
+                velocity.X -= t * edgeForce * deltaTime;
             }
 
-            if(position.y < edgeDistance)
+            if(position.Y < edgeDistance)
             {
-                float t = 1f - (position.y / edgeDistance);
-                velocity.y += t* edgeForce * deltaTime;
+                float t = 1f - (position.Y / edgeDistance);
+                velocity.Y += t* edgeForce * deltaTime;
             }
-            else if(position.y > height - edgeDistance)
+            else if(position.Y > height - edgeDistance)
             {
-                float t = (position.y - (height - edgeDistance)) / edgeDistance;
-                velocity.y -= t * edgeForce * deltaTime;
+                float t = (position.Y - (height - edgeDistance)) / edgeDistance;
+                velocity.Y -= t * edgeForce * deltaTime;
             }
         }
     }

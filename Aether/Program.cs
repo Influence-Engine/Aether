@@ -3,6 +3,7 @@ using Aether.Simulation;
 using Essence;
 using Essence.Input;
 using SDL3;
+using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -15,8 +16,8 @@ namespace Aether
         const int width = 1920;
         const int height = 1080;
 
-        const int particleCount = 60000;
-        const int typeCount = 6;
+        const int particleCount = 80000;
+        const int typeCount = 12;
 
         public static void Main(string[] args)
         {
@@ -119,10 +120,10 @@ namespace Aether
                 if (Input.GetKeyDown(KeyCode.Escape))
                     running = false; // Quick escape
 
-                if (Input.mouseScrollDelta.y != 0)
+                if (Input.mouseScrollDelta.Y != 0)
                 {
                     float zoomFactor = 0.1f;
-                    if (Input.mouseScrollDelta.y > 0)
+                    if (Input.mouseScrollDelta.Y > 0)
                         camera.zoom += zoomFactor;
                     else
                         camera.zoom -= zoomFactor;
@@ -150,7 +151,7 @@ namespace Aether
                 }
 
                 float panSpeed = 500f / camera.zoom * (float)Time.deltaTime;
-                Vector2 movement = Input.Vertical * Vector2.Down + Input.Horizontal * Vector2.Right;
+                Vector2 movement = Input.Vertical * -Vector2.UnitY + Input.Horizontal * Vector2.UnitX;
                 camera.Move(movement * panSpeed);
 
                 // Fixed timestep simulation

@@ -1,4 +1,6 @@
 ﻿using Essence;
+using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace Aether.Simulation
 {
@@ -63,7 +65,7 @@ namespace Aether.Simulation
             for(int i = 0; i < particleCount; i++)
             {
                 ref Particle particle = ref particles[i];
-                grid.Insert(i, particle.position.x, particle.position.y);
+                grid.Insert(i, particle.position.X, particle.position.Y);
             }
         }
 
@@ -79,8 +81,8 @@ namespace Aether.Simulation
             {
                 ref Particle particle = ref particles[i];
 
-                float particleX = particle.position.x;
-                float particleY = particle.position.y;
+                float particleX = particle.position.X;
+                float particleY = particle.position.Y;
 
                 float forceX = 0f;
                 float forceY = 0f;
@@ -108,8 +110,8 @@ namespace Aether.Simulation
                             {
                                 ref Particle other = ref particles[j];
 
-                                float deltaX = other.position.x - particleX;
-                                float deltaY = other.position.y - particleY;
+                                float deltaX = other.position.X - particleX;
+                                float deltaY = other.position.Y - particleY;
 
                                 float distanceSquared = deltaX * deltaX + deltaY * deltaY;
                                 if (distanceSquared <= 0.1f || distanceSquared >= interactionSquared)
@@ -118,8 +120,12 @@ namespace Aether.Simulation
                                     continue;
                                 }
 
-                                float distance = MathF.Sqrt(distanceSquared);
-                                float invertDistance = 1f / distance;
+                                //float distance = MathF.Sqrt(distanceSquared);
+                                //float invertDistance = 1f / distance;
+
+                                float invertDistance = FastInvSqrt(distanceSquared);
+                                float distance = 1f / invertDistance;
+
 
                                 float directionX = deltaX * invertDistance;
                                 float directionY = deltaY * invertDistance;
@@ -148,8 +154,8 @@ namespace Aether.Simulation
                     }
                 }
 
-                particle.velocity.x += forceX * forcePower;
-                particle.velocity.y += forceY * forcePower;
+                particle.velocity.X += forceX * forcePower;
+                particle.velocity.Y += forceY * forcePower;
             });
 
             for (int i = 0; i < particleCount; i++)
@@ -164,6 +170,14 @@ namespace Aether.Simulation
             {
                 Tick();
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static float FastInvSqrt(float x)
+        {
+            uint i = 0x5F3759DF - (BitConverter.SingleToUInt32Bits(x) >> 1);
+            float y = BitConverter.UInt32BitsToSingle(i);
+            return y * (1.5f - 0.5f * x * y * y); // One Newton iteration
         }
     }
 }
