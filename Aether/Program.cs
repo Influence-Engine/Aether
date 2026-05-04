@@ -3,6 +3,8 @@ using Aether.Simulation;
 using Essence;
 using Essence.Input;
 using SDL3;
+using System;
+using System.IO;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -16,8 +18,8 @@ namespace Aether
         const int width = 1920;
         const int height = 1080;
 
-        const int particleCount = 80000;
-        const int typeCount = 12;
+        const int particleCount = 65536;
+        const int typeCount = 8;
 
         const float targetFPS = 60f;
 

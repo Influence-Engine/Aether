@@ -1,6 +1,8 @@
 ﻿using Essence;
+using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace Aether.Simulation
 {
@@ -158,9 +160,10 @@ namespace Aether.Simulation
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static float FastInvSqrt(float x)
         {
-            uint i = 0x5F3759DF - (BitConverter.SingleToUInt32Bits(x) >> 1);
-            float y = BitConverter.UInt32BitsToSingle(i);
-            return y * (1.5f - 0.5f * x * y * y); // One Newton iteration
+            float xhalf = 0.5f * x;
+            int i = 0x5f3759df - (BitConverter.SingleToInt32Bits(x) >> 1);
+            float y = BitConverter.Int32BitsToSingle(i);
+            return y * (1.5f - xhalf * y * y);
         }
     }
 }

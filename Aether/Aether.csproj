@@ -1,23 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <PublishAot>True</PublishAot>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<PublishAot>True</PublishAot>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
 
-  <ItemGroup>
-	  <Reference Include="SDL3-CS">
-		  <HintPath>Managed\Assemblies\SDL3-CS.dll</HintPath>
-		  <Private>false</Private>
-	  </Reference>
-	  <Reference Include="Essence">
-		  <HintPath>Managed\Assemblies\Essence.dll</HintPath>
-		  <Private>false</Private>
-	  </Reference>
-  </ItemGroup>
+	<ItemGroup>
+		<Reference Include="SDL3-CS">
+			<HintPath>Managed\Assemblies\SDL3-CS.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="Essence">
+			<HintPath>Managed\Assemblies\Essence.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+	</ItemGroup>
 
 	<ItemGroup>
 		<None Include="..\License">
@@ -26,26 +26,26 @@
 		</None>
 	</ItemGroup>
 
-  <ItemGroup>
-    <None Update="Managed\Assemblies\Essence.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Managed\Assemblies\SDL3-CS.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Managed\Assemblies\SDL3.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-	  
-    <None Update="Managed\Licenses\Essence.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Managed\Licenses\SDL3-CS.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Managed\Licenses\SDL3.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Update="Managed\Assemblies\Essence.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Managed\Assemblies\SDL3-CS.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Managed\Assemblies\SDL3.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+
+		<None Update="Managed\Licenses\Essence.txt">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Managed\Licenses\SDL3-CS.txt">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Managed\Licenses\SDL3.txt">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
 </Project>

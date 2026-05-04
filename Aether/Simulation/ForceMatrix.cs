@@ -1,4 +1,6 @@
-﻿namespace Aether.Simulation
+﻿using System;
+
+namespace Aether.Simulation
 {
     public class ForceMatrix
     {
