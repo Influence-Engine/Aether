@@ -19,6 +19,8 @@ namespace Aether
         const int particleCount = 80000;
         const int typeCount = 12;
 
+        const float targetFPS = 60f;
+
         public static void Main(string[] args)
         {
             string assembliesPath = Path.Combine(AppContext.BaseDirectory, "Managed", "Assemblies");
@@ -68,9 +70,13 @@ namespace Aether
             bool isDragging = false;
             Vector2 lastMouseWorldPos = Vector2.Zero;
 
+            float targetFrameDuration = 1000f / targetFPS;
+
             while (running)
             {
-                ulong currentTime = SDL.GetTicks();
+                ulong frameStart = SDL.GetTicks();
+
+                ulong currentTime = frameStart;
                 deltaTime = (currentTime - lastTime) / 1000f;
                 lastTime = currentTime;
 
@@ -179,6 +185,11 @@ namespace Aether
                 Renderer.DrawParticleRectBatch(renderer, life, camera);
 
                 SDL.RenderPresent(renderer);
+
+                ulong frameEnd = SDL.GetTicks();
+                float frameTime = frameEnd - frameStart;
+                if (frameTime < targetFrameDuration)
+                    SDL.Delay((uint)(targetFrameDuration - frameTime));
 
                 //Console.WriteLine($"TimeScale: {timeScale}");
                 //Console.WriteLine($"FPS: {1f / deltaTime}");
